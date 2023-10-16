@@ -114,7 +114,6 @@ void ADNS3080::frameCapture(uint8_t *frame) {
 
   // Disable SPI communication
   HAL_GPIO_WritePin(VFS_SPI_CS_GPIO_Port, VFS_SPI_CS_Pin, GPIO_PIN_SET);
-
   delay_us(ADNS3080_T_LOAD + ADNS3080_T_BEXIT);
 }
 
