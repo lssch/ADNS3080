@@ -80,8 +80,9 @@ public:
   bool is_accessible();
   void configure(uint8_t led_shutter, uint8_t high_resolution);
   void motionClear();
-  void motionBurst(uint8_t *motion, int8_t *dx, int8_t *dy, uint8_t *squal, uint16_t *shutter, uint8_t *max_pix);
-  void displacement(int8_t *dx, int8_t *dy);
+  void motionBurst(uint8_t &motion, int8_t &dx, int8_t &dy, uint8_t &squal, uint16_t &shutter,
+                   uint8_t &max_pix);
+  void displacement(int8_t &dx, int8_t &dy);
   void frameCapture(uint8_t *frame);
 
 private:

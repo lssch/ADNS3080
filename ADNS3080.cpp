@@ -27,8 +27,8 @@ void ADNS3080::motionClear() {
   writeRegister(ADNS3080_MOTION_CLEAR, 0x00);
 }
 
-void ADNS3080::motionBurst(uint8_t *motion, int8_t *dx, int8_t *dy, uint8_t *squal, uint16_t *shutter,
-                           uint8_t *max_pix) {
+void ADNS3080::motionBurst(uint8_t &motion, int8_t &dx, int8_t &dy, uint8_t &squal, uint16_t &shutter,
+                           uint8_t &max_pix) {
   uint8_t tx_data[1] = {0}, rx_data[7] = {0};
 
   // Enable SPI communication
@@ -45,21 +45,21 @@ void ADNS3080::motionBurst(uint8_t *motion, int8_t *dx, int8_t *dy, uint8_t *squ
   HAL_GPIO_WritePin(VFS_SPI_CS_GPIO_Port, VFS_SPI_CS_Pin, GPIO_PIN_SET);
 
   // Calculate values
-  *motion = (rx_data[0] & 0b10000000) >> 7;
-  if (*motion != 0) {
-    *dx = rx_data[1];
-    *dy = rx_data[2];
+  motion = (rx_data[0] & 0b10000000) >> 7;
+  if (motion != 0) {
+    dx = rx_data[1];
+    dy = rx_data[2];
   } else {
-    *dx = 0;
-    *dy = 0;
+    dx = 0;
+    dy = 0;
   }
-  *squal = rx_data[3];
-  *shutter = rx_data[4] << 8 | rx_data[5];
-  *max_pix = rx_data[6];
+  squal = rx_data[3];
+  shutter = rx_data[4] << 8 | rx_data[5];
+  max_pix = rx_data[6];
 
 }
 
-void ADNS3080::displacement(int8_t *dx, int8_t *dy) {
+void ADNS3080::displacement(int8_t &dx, int8_t &dy) {
   uint8_t tx_data[1] = {0}, rx_data[3] = {0};
   // Enable SPI communication
   HAL_GPIO_WritePin(VFS_SPI_CS_GPIO_Port, VFS_SPI_CS_Pin, GPIO_PIN_RESET);
@@ -77,11 +77,11 @@ void ADNS3080::displacement(int8_t *dx, int8_t *dy) {
 
   // Check if motion occurred
   if ((rx_data[0] & 0b10000000) >> 7 == 1) {
-    *dx = rx_data[1];
-    *dy = rx_data[2];
+    dx = rx_data[1];
+    dy = rx_data[2];
   } else {
-    *dx = 0;
-    *dy = 0;
+    dx = 0;
+    dy = 0;
   }
 }
 
@@ -100,15 +100,17 @@ void ADNS3080::frameCapture(uint8_t *frame) {
 
   // Receive pixels until the first pixel (0,0) is found
   rx_data[0] = 0;
-  while ((rx_data[0] & 0b01000000) == 0) {
+  while ((rx_data[0] & 0B01000000) == 0) {
     HAL_SPI_Receive(&hspi1, rx_data, 1, ADNS3080_TIMEOUT);
     delay_us(ADNS3080_T_LOAD);
   }
 
+  delay_us(2*ADNS3080_T_LOAD);
+
   // Receive a complete frame in row mayor
-  for( int i = 0; i < 30*30; i++) {
-    HAL_SPI_Receive(&hspi1, rx_data, 1, ADNS3080_TIMEOUT);
+  for (int i = 0; i < ADNS3080_PIXELS_X*ADNS3080_PIXELS_Y; i++) {
     frame[i] = rx_data[0] << 2;
+    HAL_SPI_Receive(&hspi1, rx_data, 1, ADNS3080_TIMEOUT);
     delay_us(ADNS3080_T_LOAD);
   }
 
