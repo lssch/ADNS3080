@@ -6,6 +6,8 @@
 #define STM32_VFS_ADNS3080_H
 
 #include "main.h"
+#include "types/parameter/parameter.h"
+#include "types/sensor/sensor.h"
 #include <vector>
 
 
@@ -21,8 +23,7 @@
 #define ADNS3080_T_BEXIT 4
 
 // ADNS3080 hardware configure
-#define ADNS3080_PIXELS_X 30
-#define ADNS3080_PIXELS_Y 30
+#define ADNS3080_PIXELS 30
 #define ADNS3080_CLOCK_SPEED 24000000
 
 // Register Map
@@ -76,18 +77,21 @@ extern SPI_HandleTypeDef hspi1;
 
 class ADNS3080 {
 public:
+  ADNS3080(SPI_HandleTypeDef* hspi_, Parameter::Vfs* parameter_);
   static void reset();
   bool is_accessible();
-  void configure(uint8_t led_shutter, uint8_t high_resolution);
+  uint8_t init();
   void motionClear();
-  void motionBurst(uint8_t &motion, int8_t &dx, int8_t &dy, uint8_t &squal, uint16_t &shutter,
-                   uint8_t &max_pix);
-  void displacement(int8_t &dx, int8_t &dy);
-  void frameCapture(uint8_t *frame);
+  void motionBurst(Sensor::Vfs* vfs);
+  void displacement(Sensor::Vfs* vfs);
+  void frameCapture();
 
 private:
-  static void writeRegister(uint8_t reg, uint8_t data);
-  static uint8_t readRegister(uint8_t reg);
+  void writeRegister(uint8_t reg, uint8_t data);
+  uint8_t readRegister(uint8_t reg);
+
+  SPI_HandleTypeDef *hspi;
+  Parameter::Vfs* parameter;
 };
 
 
