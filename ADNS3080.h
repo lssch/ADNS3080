@@ -6,8 +6,8 @@
 #define STM32_VFS_ADNS3080_H
 
 #include "main.h"
-#include "types/parameter/parameter.h"
-#include "types/sensor/sensor.h"
+#include "types/parameter.h"
+#include "types/sensor.h"
 #include <vector>
 
 
