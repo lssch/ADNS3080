@@ -72,26 +72,53 @@
 #define ADNS3080_FRAME_RATE_MAX 6469
 #define ADNS3080_FRAME_RATE_MIN 2000
 
-
-extern SPI_HandleTypeDef hspi1;
-
 class ADNS3080 {
 public:
-  ADNS3080(SPI_HandleTypeDef* hspi_, Parameter::Vfs* parameter_);
-  static void reset();
+  /// @brief Visual flow sensor object
+  /// @param[in,out] hspi SPI interface to communicate with the connected sensor.
+  /// @param[in] parameter Parameters which contains the information about the hardware implementation of the Sensor an configurable settings.
+  ADNS3080(SPI_HandleTypeDef &hspi, const Parameter::Vfs &parameter);
+
+  /// @brief Sends a hardware reset to the sensor.
+  void reset();
+
+  /// @brief Checks if the sensor is accessible.
+  /// @return true if the sensor is accessible.
   bool is_accessible();
+
+  /// @brief Initializer to setup the sensor
+  /// @return SUCCESS if the sensor is ready for use
+  /// @todo This function can be eliminated if the Constructor is called inside the main function and after the initialisation of the hspi
   uint8_t init();
+
+  /// @brief Clears the current motion data in the sensor buffer
   void motionClear();
+
+  /// @brief Reads the current motion data (dy, dy, surface quality) form the sensor buffer.
+  /// @param vfs Structure to store the motion data.
   void motionBurst(Sensor::Vfs* vfs);
+
+  /// @brief Reads the current motion data (dy, dy) form the sensor buffer.
+  /// @param vfs Structure to store the motion data.
   void displacement(Sensor::Vfs* vfs);
+
+  /// @brief Reads the current camera frame from the sensor buffer and prints it to the console to view it with a python visualizer.
+  /// @attention This call will erase the current firmware from the sensor. A power cycle is needed to reload the firmware.
   void frameCapture();
 
 private:
-  void writeRegister(uint8_t reg, uint8_t data);
-  uint8_t readRegister(uint8_t reg);
+  /// @brief Wrapper for the built in HAL_SPI_Transmit function for better ease of use.
+  /// @param reg Register to write to.
+  /// @param data Data which needs to be writen to the corresponding register.
+  void writeRegister(const uint8_t reg, const uint8_t data);
 
-  SPI_HandleTypeDef *hspi;
-  Parameter::Vfs* parameter;
+  /// @brief Wrapper for the built in HAL_SPI_Receive function for better ease of use.
+  /// @param reg Register to read from.
+  /// @return Data which is stored in the corresponding register.
+  uint8_t readRegister(const uint8_t reg);
+
+  SPI_HandleTypeDef &_hspi;
+  const Parameter::Vfs &_parameter;
 };
 
 
